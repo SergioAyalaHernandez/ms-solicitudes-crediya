@@ -8,6 +8,8 @@ public class Constants {
   public static final String REQUESTS_PATH_WILDCARD = API_BASE_PATH + "/solicitudes/**";
   public static final String SOLICITUD_PATH = API_BASE_PATH + "/solicitud";
   public static final String SOLICITUDES_PATH = API_BASE_PATH + "/solicitudes";
+  public static final String ERROR_CREDIT_NOT_FOUND = "Crédito con ID %d no encontrado";
+  public static final String ID = "id";
 
   public static final String WEBJARS_PATH = "/webjars/**";
   public static final String SWAGGER_UI_PATH = "/swagger-ui/**";
@@ -35,6 +37,7 @@ public class Constants {
   // Mensajes de error
   public static final String ERROR_CREATE_CREDIT = "Ocurrió un error inesperado: ";
   public static final String ERROR_GET_CREDITS = "Error al obtener la lista de créditos: ";
+  public static final String ERROR_UPDATE_CREDIT = "Error al actualizar el crédito: ";
 
   // Tamaños
   public static final String SIZE = "size";

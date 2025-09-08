@@ -160,4 +160,66 @@ class CreditRepositoryAdapterTest {
 
     verify(creditApplicationRepository).countAllCredits();
   }
+
+  @Test
+  void shouldFindByIdSuccessfully() {
+    // Arrange
+    Long id = 1L;
+    when(creditApplicationRepository.findById(id)).thenReturn(Mono.just(savedCreditApplication));
+    when(creditApplicationMapper.toDto(savedCreditApplication)).thenReturn(creditParameters);
+
+    // Act
+    Mono<CreditReponse> result = creditRepositoryAdapter.findById(id);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response ->
+                    Constants.STATUS_SUCCESS.equals(response.getStatusResponse()) &&
+                            response.getCreditParameters() != null &&
+                            response.getErrorMessage() == null)
+            .verifyComplete();
+
+    verify(creditApplicationRepository).findById(id);
+    verify(creditApplicationMapper).toDto(savedCreditApplication);
+  }
+
+  @Test
+  void shouldHandleErrorWhenFindingById() {
+    // Arrange
+    Long id = 1L;
+    RuntimeException exception = new RuntimeException("Entity not found");
+    when(creditApplicationRepository.findById(id)).thenReturn(Mono.error(exception));
+
+    // Act
+    Mono<CreditReponse> result = creditRepositoryAdapter.findById(id);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response ->
+                    Constants.STATUS_FAILURE.equals(response.getStatusResponse()) &&
+                            "Entity not found".equals(response.getErrorMessage()))
+            .verifyComplete();
+
+    verify(creditApplicationRepository).findById(id);
+  }
+
+  @Test
+  void shouldSaveCreditParametersSuccessfully() {
+    // Arrange
+    when(creditApplicationMapper.toEntity(creditParameters)).thenReturn(creditApplication);
+    when(creditApplicationRepository.save(creditApplication)).thenReturn(Mono.just(savedCreditApplication));
+    when(creditApplicationMapper.toDto(savedCreditApplication)).thenReturn(creditParameters);
+
+    // Act
+    Mono<CreditParameters> result = creditRepositoryAdapter.save(creditParameters);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNext(creditParameters)
+            .verifyComplete();
+
+    verify(creditApplicationMapper).toEntity(creditParameters);
+    verify(creditApplicationRepository).save(creditApplication);
+    verify(creditApplicationMapper).toDto(savedCreditApplication);
+  }
 }

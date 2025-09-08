@@ -11,6 +11,7 @@ public class Constants {
   // Mensajes de log
   public static final String LOG_ENTITY_BEFORE_SAVE = "Entidad creada antes de guardar: ";
   public static final String LOG_ERROR_SAVE = "Error al guardar el crédito: ";
+  public static final String LOG_ERROR_UPDATE = "Error al actualizar el crédito: ";
 
   // credit type
   public static final String ERROR_CREDIT_TYPE_NOT_FOUND = "Tipo de crédito con ID %d no encontrado";

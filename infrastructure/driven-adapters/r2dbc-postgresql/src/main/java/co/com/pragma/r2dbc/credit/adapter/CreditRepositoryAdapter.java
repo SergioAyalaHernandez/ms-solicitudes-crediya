@@ -64,4 +64,28 @@ public class CreditRepositoryAdapter implements CreditGateway {
   public Mono<Long> findSizeAllCredits() {
     return creditApplicationRepository.countAllCredits();
   }
+
+  @Override
+  public Mono<CreditReponse> findById(Long id) {
+      return creditApplicationRepository.findById(id)
+              .map(entity -> CreditReponse.builder()
+                      .statusResponse(Constants.STATUS_SUCCESS)
+                      .creditParameters(creditApplicationMapper.toDto(entity))
+                      .build())
+              .onErrorResume(e -> {
+                  log.severe(Constants.LOG_ERROR_UPDATE + e.getMessage());
+                  return Mono.just(CreditReponse.builder()
+                          .statusResponse(Constants.STATUS_FAILURE)
+                          .errorMessage(e.getMessage())
+                          .build());
+              });
+  }
+
+  @Override
+  public Mono<CreditParameters> save(CreditParameters creditParameters) {
+    return Mono.just(creditParameters)
+            .map(creditApplicationMapper::toEntity)
+            .flatMap(creditApplicationRepository::save)
+            .map(creditApplicationMapper::toDto);
+  }
 }

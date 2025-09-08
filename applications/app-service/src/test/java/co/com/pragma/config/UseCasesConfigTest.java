@@ -55,6 +55,16 @@ public class UseCasesConfigTest {
         public co.com.pragma.model.gateway.CreditGateway creditGateway() {
             return org.mockito.Mockito.mock(co.com.pragma.model.gateway.CreditGateway.class);
         }
+
+        @Bean
+        public co.com.pragma.model.gateway.NotificacionSQSGateway notificacionSQSGateway() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.NotificacionSQSGateway.class);
+        }
+
+        @Bean
+        public co.com.pragma.model.gateway.JsonConverter jsonConverter() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.JsonConverter.class);
+        }
     }
 
     static class MyUseCase {

@@ -32,6 +32,14 @@ public class Constants {
 
   public static final String LOG_FETCHING_CREDITS_LIST = "Obteniendo lista de créditos paginada Pagina: ";
   public static final String LOG_ERROR_FETCHING_CREDITS = "Error al obtener créditos";
+  public static final String LOG_ERROR_UPDATE = "Error al actualizar el crédito: ";
+
   public static final String SIZE = " Size: ";
+
+  public static final String STATUS_APPROVED = "Aprobada";
+  public static final String STATUS_REJECTED = "Rechazada";
+  public static final String CREDIT_NOT_FOUND_MESSAGE = "Crédito con id %d no encontrado";
+
+  public static final String JSON_ERROR_MESSAGE = "Error al convertir a JSON: ";
 
 }

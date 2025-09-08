@@ -17,8 +17,8 @@ subprojects {
     compileJava.dependsOn validateStructure
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     //build.dependsOn 'pitest'
@@ -28,6 +28,7 @@ subprojects {
     }
 
     dependencies {
+		implementation platform('software.amazon.awssdk:bom:2.32.13')
         implementation 'io.projectreactor:reactor-core'
         implementation 'io.projectreactor.addons:reactor-extra'
 
@@ -60,7 +61,7 @@ subprojects {
                 'co.com.pragma.api.config.SecurityHeadersConfig',
                 'co.com.pragma.api.openapi.OpenApiConfig',
                 'co.com.pragma.api.security.SecurityConfig',
-                'co.com.pragma.consumer.config.RestConsumerConfig',
+                'co.com.pragma.consumer.config.RestConsumerConfig'
         ]
         excludedTestClasses = []
         pitestVersion = '1.20.1'
