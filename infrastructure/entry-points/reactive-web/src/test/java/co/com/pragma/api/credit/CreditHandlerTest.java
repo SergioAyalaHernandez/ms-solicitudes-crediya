@@ -1,11 +1,14 @@
 package co.com.pragma.api.credit;
 
 import co.com.pragma.api.utils.Constants;
+import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditDetailDTO;
 import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.model.credit.CreditReponse;
 import co.com.pragma.usecase.CreateCreditUseCase;
 import co.com.pragma.usecase.CreditListUseCase;
+import co.com.pragma.usecase.UpdateCreditUseCase;
+import co.com.pragma.usecase.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +37,9 @@ class CreditHandlerTest {
   private CreditListUseCase creditListUseCase;
 
   @Mock
+  private UpdateCreditUseCase updateCreditUSeCase;
+
+  @Mock
   private ServerRequest serverRequest;
 
   private CreditHandler creditHandler;
@@ -41,7 +47,7 @@ class CreditHandlerTest {
   @BeforeEach
   void setUp() {
     // Arrange
-    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase);
+    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase, updateCreditUSeCase);
   }
 
   @Test
@@ -184,6 +190,68 @@ class CreditHandlerTest {
     // Assert
     StepVerifier.create(result)
             .expectNextMatches(response -> response.statusCode().is5xxServerError())
+            .verifyComplete();
+  }
+
+  @Test
+  void updateCredit_Success() {
+    // Arrange
+    Long id = 1L;
+    CreditApproved creditApproved = new CreditApproved();
+    CreditReponse expectedResponse = new CreditReponse();
+
+    when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
+    when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved))).thenReturn(Mono.just(expectedResponse));
+
+    // Act
+    Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response -> response.statusCode().is2xxSuccessful())
+            .verifyComplete();
+  }
+
+  @Test
+  void updateCredit_NotFound() {
+    // Arrange
+    Long id = 1L;
+    CreditApproved creditApproved = new CreditApproved();
+    String errorMessage = "Credit not found";
+
+    when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
+    when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
+            .thenReturn(Mono.error(new NotFoundException(errorMessage)));
+
+    // Act
+    Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response -> response.statusCode().equals(HttpStatus.NOT_FOUND))
+            .verifyComplete();
+  }
+
+  @Test
+  void updateCredit_Error() {
+    // Arrange
+    Long id = 1L;
+    CreditApproved creditApproved = new CreditApproved();
+    String errorMessage = "Internal server error";
+
+    when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
+    when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
+            .thenReturn(Mono.error(new RuntimeException(errorMessage)));
+
+    // Act
+    Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNextMatches(response -> response.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR))
             .verifyComplete();
   }
 }

@@ -1,9 +1,12 @@
 package co.com.pragma.api.credit;
 
 import co.com.pragma.api.utils.Constants;
+import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.usecase.CreateCreditUseCase;
 import co.com.pragma.usecase.CreditListUseCase;
+import co.com.pragma.usecase.UpdateCreditUseCase;
+import co.com.pragma.usecase.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -16,6 +19,7 @@ public class CreditHandler {
 
   private final CreateCreditUseCase createCreditUseCase;
   private final CreditListUseCase creditListUseCase;
+  private final UpdateCreditUseCase updateCreditUseCase;
 
   public Mono<ServerResponse> createCredit(ServerRequest request) {
     String token = request.headers().firstHeader(Constants.HEADER_AUTHORIZATION);
@@ -37,5 +41,21 @@ public class CreditHandler {
             .flatMap(list -> ServerResponse.ok().bodyValue(list))
             .onErrorResume(error -> ServerResponse.status(500)
                     .bodyValue(Constants.ERROR_GET_CREDITS + error.getMessage()));
+  }
+
+  public Mono<ServerResponse> updateCredit(ServerRequest request) {
+    Long id = Long.valueOf(request.pathVariable(Constants.ID));
+
+    return request.bodyToMono(CreditApproved.class)
+            .flatMap(creditParams -> updateCreditUseCase.updateCreditStatus(id, creditParams))
+            .flatMap(updated -> ServerResponse.ok().bodyValue(updated))
+            .onErrorResume(error -> {
+              if (error instanceof NotFoundException) {
+                return ServerResponse.status(404)
+                        .bodyValue(Constants.ERROR_CREDIT_NOT_FOUND + error.getMessage());
+              }
+              return ServerResponse.status(500)
+                      .bodyValue(Constants.ERROR_UPDATE_CREDIT + error.getMessage());
+            });
   }
 }
