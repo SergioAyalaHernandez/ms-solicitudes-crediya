@@ -40,12 +40,10 @@ public class MicrometerMetricPublisher implements MetricPublisher {
 
     }
 
-    List<Tag> buildTags(MetricCollection metricCollection) {
+    private List<Tag> buildTags(MetricCollection metricCollection) {
         return metricCollection.stream()
                 .filter(record -> record.value() instanceof String || record.value() instanceof Boolean)
                 .map(record -> Tag.of(record.metric().name(), record.value().toString()))
                 .collect(Collectors.toList());
     }
-
-
 }

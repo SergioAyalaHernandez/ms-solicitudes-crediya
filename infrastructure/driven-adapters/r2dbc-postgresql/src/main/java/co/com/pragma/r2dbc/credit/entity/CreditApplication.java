@@ -57,5 +57,8 @@ public class CreditApplication {
 
   @Column("tasa_interes")
   private BigDecimal tasaInteres;
+
+  @Column("email_notificaciones")
+  private String emailNotification;
 }
 

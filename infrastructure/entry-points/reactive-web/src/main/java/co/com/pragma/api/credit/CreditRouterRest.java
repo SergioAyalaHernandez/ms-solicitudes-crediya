@@ -126,7 +126,8 @@ public class CreditRouterRest {
   public RouterFunction<ServerResponse> routerFunction(CreditHandler handler) {
     return route(POST("/api/v1/solicitud"), handler::createCredit)
             .andRoute(GET("/api/v1/solicitudes"), handler::getCreditsList)
-            .andRoute(PUT("/api/v1/solicitud/{id}"), handler::updateCredit);
+            .andRoute(PUT("/api/v1/solicitud/{id}"), handler::updateCredit)
+            .andRoute(POST("/api/v1/capacidad-capacidad"), handler::calculateDebtCapacity);
   }
 }
 

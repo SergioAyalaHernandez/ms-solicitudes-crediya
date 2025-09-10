@@ -41,5 +41,7 @@ public class Constants {
   public static final String CREDIT_NOT_FOUND_MESSAGE = "Crédito con id %d no encontrado";
 
   public static final String JSON_ERROR_MESSAGE = "Error al convertir a JSON: ";
+  public static final String LOG_SUCCESS = "Estado de la solicitud de crédito actualizado exitosamente";
+  public static final String LOG_ERROR = "Error al actualizar el estado de la solicitud de crédito: ";
 
 }

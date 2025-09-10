@@ -32,5 +32,6 @@ public class CreditListDto {
 
   @Column(name = "estadoSolicitud")
   private String estadoSolicitud;
+
 }
 

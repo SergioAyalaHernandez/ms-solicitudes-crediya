@@ -47,7 +47,10 @@ adapter:
     region: "us-east-1"
     queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/crediyanotificaciones"
     endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/crediyanotificaciones"
-
+  sqscapacity:
+    region: "us-east-1"
+    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
+    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
 resilience4j:
   circuitbreaker:
     instances:
@@ -69,3 +72,12 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+entrypoint:
+  sqs:
+    region: "us-east-1"
+    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/decisioncapacidadendeudamiento"
+    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/decisioncapacidadendeudamiento"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1

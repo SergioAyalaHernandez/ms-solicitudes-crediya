@@ -29,4 +29,5 @@ public interface CreditApplicationRepository extends ReactiveCrudRepository<Cred
   @Query("SELECT COUNT(*) FROM crediya.solicitudes_credito")
   Mono<Long> countAllCredits();
 
+  Flux<CreditApplication> findAllByUserId(Long userId);
 }

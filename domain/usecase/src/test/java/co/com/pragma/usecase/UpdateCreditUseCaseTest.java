@@ -55,7 +55,7 @@ class UpdateCreditUseCaseTest {
     when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
 
     // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request);
+    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
 
     // Assert
     StepVerifier.create(result)
@@ -80,7 +80,7 @@ class UpdateCreditUseCaseTest {
     when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
 
     // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request);
+    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
 
     // Assert
     StepVerifier.create(result)
@@ -97,7 +97,7 @@ class UpdateCreditUseCaseTest {
     when(creditGateway.findById(id)).thenReturn(Mono.empty());
 
     // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request);
+    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
 
     // Assert
     StepVerifier.create(result)
@@ -117,7 +117,7 @@ class UpdateCreditUseCaseTest {
     when(creditGateway.save(any())).thenReturn(Mono.error(new RuntimeException("DB error")));
 
     // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request);
+    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
 
     // Assert
     StepVerifier.create(result)
@@ -134,14 +134,14 @@ class UpdateCreditUseCaseTest {
 
     when(creditGateway.findById(id)).thenReturn(Mono.just(creditResponse));
     when(creditGateway.save(any())).thenReturn(Mono.just(creditResponse.getCreditParameters()));
-    when(jsonConverter.toJson(any())).thenReturn(Optional.of("json-credit")); // <-- ✅
+    when(jsonConverter.toJson(any())).thenReturn(Optional.of("json-credit"));
     when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
 
     // Act
-    updateCreditUseCase.updateCreditStatus(id, request).block();
+    updateCreditUseCase.updateCreditStatus(id, request,"Bearer token").block();
 
     // Assert
-    verify(notificacionSQSGateway).emit("Optional[json-credit]"); // <-- ✅ esperado
+    verify(notificacionSQSGateway).emit("Optional[json-credit]");
   }
 
 }
