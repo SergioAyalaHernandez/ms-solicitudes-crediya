@@ -26,10 +26,12 @@ public class CreateCreditUseCase {
 
   public Mono<CreditReponse> createCredit(CreditParameters creditParameters, String token) {
     log.info(Constants.LOG_INIT_CREDIT_CREATION);
+    String email = jwtProvider.getEmailFromToken(token);
     return Mono.just(creditParameters)
             .flatMap(params -> validateJwtIdUser(params, token))
             .flatMap(this::validateCreditType)
             .flatMap(this::validateUserExistence)
+            .doOnNext(creditReponse -> creditReponse.getCreditParameters().setEmailNotification(email))
             .flatMap(this::persistCredit)
             .onErrorResume(this::handleError)
             .doOnSuccess(response -> log.info(Constants.LOG_END_CREDIT_CREATION + response.getStatusResponse()));

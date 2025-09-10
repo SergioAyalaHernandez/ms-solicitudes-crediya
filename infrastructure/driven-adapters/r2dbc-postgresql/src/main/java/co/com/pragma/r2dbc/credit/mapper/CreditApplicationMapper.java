@@ -11,6 +11,7 @@ public interface CreditApplicationMapper {
   @Mapping(target = "id", ignore = true)
   CreditApplication toEntity(CreditParameters dto);
 
+  @Mapping(source = "id", target = "idEntidadGuardada")
   CreditParameters toDto(CreditApplication entity);
 
 }

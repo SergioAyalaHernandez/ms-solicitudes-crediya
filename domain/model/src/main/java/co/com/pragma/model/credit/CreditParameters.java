@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreditParameters {
+  private Long idEntidadGuardada;
   private Long userId;
   private BigDecimal monto;
   private Integer plazoMeses;
@@ -23,4 +24,5 @@ public class CreditParameters {
   private String estadoSolicitud;
   private BigDecimal  tasaInteres;
   private Long documentNumber;
+  private String emailNotification;
 }

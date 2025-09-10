@@ -5,6 +5,7 @@ import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditDetailDTO;
 import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.model.credit.CreditReponse;
+import co.com.pragma.usecase.CalculateDebtCapacityUseCase;
 import co.com.pragma.usecase.CreateCreditUseCase;
 import co.com.pragma.usecase.CreditListUseCase;
 import co.com.pragma.usecase.UpdateCreditUseCase;
@@ -40,6 +41,9 @@ class CreditHandlerTest {
   private UpdateCreditUseCase updateCreditUSeCase;
 
   @Mock
+  private CalculateDebtCapacityUseCase calculateDebtCapacityUseCase;
+
+  @Mock
   private ServerRequest serverRequest;
 
   private CreditHandler creditHandler;
@@ -47,7 +51,7 @@ class CreditHandlerTest {
   @BeforeEach
   void setUp() {
     // Arrange
-    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase, updateCreditUSeCase);
+    creditHandler = new CreditHandler(createCreditUseCase, creditListUseCase, updateCreditUSeCase, calculateDebtCapacityUseCase);
   }
 
   @Test
@@ -202,7 +206,7 @@ class CreditHandlerTest {
 
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved))).thenReturn(Mono.just(expectedResponse));
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved),"Bearer token")).thenReturn(Mono.just(expectedResponse));
 
     // Act
     Mono<ServerResponse> result = creditHandler.updateCredit(serverRequest);
@@ -222,7 +226,7 @@ class CreditHandlerTest {
 
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved),"Bearer token"))
             .thenReturn(Mono.error(new NotFoundException(errorMessage)));
 
     // Act
@@ -243,7 +247,7 @@ class CreditHandlerTest {
 
     when(serverRequest.pathVariable(Constants.ID)).thenReturn(String.valueOf(id));
     when(serverRequest.bodyToMono(CreditApproved.class)).thenReturn(Mono.just(creditApproved));
-    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved)))
+    when(updateCreditUSeCase.updateCreditStatus(eq(id), eq(creditApproved),"Bearer token"))
             .thenReturn(Mono.error(new RuntimeException(errorMessage)));
 
     // Act

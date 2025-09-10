@@ -1,7 +1,7 @@
 package co.com.pragma.sqs.sender;
 
-import co.com.pragma.model.gateway.NotificacionSQSGateway;
-import co.com.pragma.sqs.sender.config.SQSSenderProperties;
+import co.com.pragma.model.gateway.NotificacionSQSCapacidadGateway;
+import co.com.pragma.sqs.sender.config.capacity.SQSSenderPropertiesCapacity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,8 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class SQSSender implements NotificacionSQSGateway {
-  private final SQSSenderProperties properties;
+public class SQSSenderCapacity implements NotificacionSQSCapacidadGateway {
+  private final SQSSenderPropertiesCapacity properties;
   private final SqsAsyncClient client;
 
   @Override

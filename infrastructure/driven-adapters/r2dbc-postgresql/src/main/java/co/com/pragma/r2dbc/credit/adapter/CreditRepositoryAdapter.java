@@ -35,10 +35,14 @@ public class CreditRepositoryAdapter implements CreditGateway {
   private Mono<CreditReponse> saveCreditEntity(CreditApplication entity) {
     log.info(Constants.LOG_ENTITY_BEFORE_SAVE + entity);
     return creditApplicationRepository.save(entity)
-            .map(savedEntity -> CreditReponse.builder()
+            .map(savedEntity -> {
+                CreditParameters creditParameters = creditApplicationMapper.toDto(savedEntity);
+                creditParameters.setIdEntidadGuardada(savedEntity.getId());
+                return CreditReponse.builder()
                     .statusResponse(Constants.STATUS_SUCCESS)
-                    .creditParameters(creditApplicationMapper.toDto(savedEntity))
-                    .build());
+                        .creditParameters(creditParameters)
+                        .build();
+            });
   }
 
   private Mono<CreditReponse> handleCreateCreditError(Throwable e, CreditParameters creditParameters) {
@@ -53,6 +57,22 @@ public class CreditRepositoryAdapter implements CreditGateway {
   @Override
   public Flux<CreditDetailDTO> findAllCredits(int page, int size, String token) {
     return creditApplicationRepository.findAllCreditDetails(createPageable(page, size));
+  }
+
+  @Override
+  public Flux<CreditParameters> findAllCredits(String userId) {
+    return creditApplicationRepository.findAllByUserId(Long.valueOf(userId))
+            .map(creditApplicationMapper::toDto);
+  }
+
+  @Override
+  public Mono<Void> updateState(Long id, String estado) {
+    return creditApplicationRepository.findById(id)
+            .flatMap(creditApplication -> {
+              creditApplication.setEstado(estado);
+              return creditApplicationRepository.save(creditApplication);
+            })
+            .then();
   }
 
   private Pageable createPageable(int page, int size) {

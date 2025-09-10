@@ -4,13 +4,13 @@ import co.com.pragma.model.gateway.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +49,47 @@ public class JwtProviderImpl implements JwtProvider {
       return objectId != null ? objectId : claims.getSubject();
     } catch (JwtException | IllegalArgumentException e) {
       log.warning("Error al procesar el token JWT: " + e.getMessage());
+      throw new RuntimeException("Token inválido: " + e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public String getEmailFromToken(String token) {
+    log.info("Token recibido: " + token);
+    try {
+      if (token != null && token.startsWith("Bearer ")) {
+        token = token.substring(7);
+      }
+      token = token != null ? token.trim() : "";
+
+      Claims claims = Jwts.parserBuilder()
+              .setSigningKey(secretKey)
+              .build()
+              .parseClaimsJws(token)
+              .getBody();
+      String encodedEmail = claims.get("correoElectronico", String.class);
+      return new String(Base64.getDecoder().decode(encodedEmail));
+    } catch (JwtException | IllegalArgumentException e) {
+      log.warning("Error al obtener el correo electrónico del token: " + e.getMessage());
+      throw new RuntimeException("Token inválido: " + e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public Double getSalarioFromToken(String token) {
+    try {
+      if (token != null && token.startsWith("Bearer ")) {
+        token = token.substring(7);
+      }
+      token = token != null ? token.trim() : "";
+      Claims claims = Jwts.parserBuilder()
+              .setSigningKey(secretKey)
+              .build()
+              .parseClaimsJws(token)
+              .getBody();
+      return claims.get("salarioBase", Double.class);
+    } catch (JwtException | IllegalArgumentException e) {
+      log.warning("Error al obtener el salario del token: " + e.getMessage());
       throw new RuntimeException("Token inválido: " + e.getMessage(), e);
     }
   }
