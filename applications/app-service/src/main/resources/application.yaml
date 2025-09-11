@@ -51,6 +51,10 @@ adapter:
     region: "us-east-1"
     queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
     endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
+  sqsnotificacionesporcorreo:
+    region: "us-east-1"
+    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/notificacionesporcorreo"
+    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/notificacionesporcorreo"
 resilience4j:
   circuitbreaker:
     instances:

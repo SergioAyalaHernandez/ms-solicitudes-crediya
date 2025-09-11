@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class MessageCapacidadEndeudamiento {
-  private Long idSolicitud;
+  private String idSolicitud;
   private String estado;
 }

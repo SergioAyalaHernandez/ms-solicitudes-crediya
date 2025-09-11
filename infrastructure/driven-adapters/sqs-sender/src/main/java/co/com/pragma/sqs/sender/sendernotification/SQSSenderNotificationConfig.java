@@ -1,0 +1,44 @@
+package co.com.pragma.sqs.sender.sendernotification;
+
+import co.com.pragma.sqs.sender.config.SQSSenderProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.*;
+import software.amazon.awssdk.metrics.MetricPublisher;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+
+import java.net.URI;
+
+@Configuration
+@ConditionalOnMissingBean(SqsAsyncClient.class)
+public class SQSSenderNotificationConfig {
+  @Bean
+  public SqsAsyncClient configSqs(SQSSenderPropertiesNotification properties, MetricPublisher publisher) {
+    return SqsAsyncClient.builder()
+            .endpointOverride(resolveEndpoint(properties))
+            .region(Region.of(properties.region()))
+            .overrideConfiguration(o -> o.addMetricPublisher(publisher))
+            .credentialsProvider(getProviderChain())
+            .build();
+  }
+
+  AwsCredentialsProviderChain getProviderChain() {
+    return AwsCredentialsProviderChain.builder()
+            .addCredentialsProvider(EnvironmentVariableCredentialsProvider.create())
+            .addCredentialsProvider(SystemPropertyCredentialsProvider.create())
+            .addCredentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
+            .addCredentialsProvider(ProfileCredentialsProvider.create())
+            .addCredentialsProvider(ContainerCredentialsProvider.builder().build())
+            .addCredentialsProvider(InstanceProfileCredentialsProvider.create())
+            .build();
+  }
+
+  URI resolveEndpoint(SQSSenderPropertiesNotification properties) {
+    if (properties.endpoint() != null) {
+      return URI.create(properties.endpoint());
+    }
+    return null;
+  }
+}

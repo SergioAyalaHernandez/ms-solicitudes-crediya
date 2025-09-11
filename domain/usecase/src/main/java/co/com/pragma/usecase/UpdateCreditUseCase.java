@@ -46,11 +46,9 @@ public class UpdateCreditUseCase {
     );
   }
 
-
   private Optional<String> convertToJson(CreditReponse creditResponse) {
     return jsonConverter.toJson(creditResponse);
   }
-
 
   private Mono<CreditReponse> handleError(Throwable e) {
     log.severe(Constants.LOG_ERROR_UPDATE + e.getMessage());

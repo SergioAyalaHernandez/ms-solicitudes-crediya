@@ -66,13 +66,13 @@ public class CreditRepositoryAdapter implements CreditGateway {
   }
 
   @Override
-  public Mono<Void> updateState(Long id, String estado) {
+  public Mono<CreditParameters> updateState(Long id, String estado) {
     return creditApplicationRepository.findById(id)
             .flatMap(creditApplication -> {
               creditApplication.setEstado(estado);
-              return creditApplicationRepository.save(creditApplication);
-            })
-            .then();
+              return creditApplicationRepository.save(creditApplication)
+                      .map(creditApplicationMapper::toDto);
+            });
   }
 
   private Pageable createPageable(int page, int size) {
