@@ -1,6 +1,5 @@
 package co.com.pragma.sqs.sender.sendernotification;
 
-import co.com.pragma.sqs.sender.config.SQSSenderProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,4 +40,6 @@ public class SQSSenderNotificationConfig {
     }
     return null;
   }
+
+
 }

@@ -73,7 +73,7 @@ public class CalculateDebtCapacityUseCase {
             });
   }
 
-  private Mono<List<PrestamoActivo>> obtenerPrestamosActivos(Long userId) {
+  Mono<List<PrestamoActivo>> obtenerPrestamosActivos(Long userId) {
     return creditGateway.findAllCredits(String.valueOf(userId))
             .filter(credit -> Constants.STATUS_APPROVED.equals(credit.getEstado()))
             .map(credit -> PrestamoActivo.builder()
@@ -102,7 +102,7 @@ public class CalculateDebtCapacityUseCase {
             });
   }
 
-  private Mono<CreditReponse> validateJwtIdUser(CreditParameters parameters, String token) {
+  Mono<CreditReponse> validateJwtIdUser(CreditParameters parameters, String token) {
     String userId = jwtProvider.getUserIdFromToken(token);
     if (!String.valueOf(parameters.getUserId()).equals(userId)) {
       log.warning(Constants.LOG_USER_ID_MISMATCH);
@@ -154,7 +154,7 @@ public class CalculateDebtCapacityUseCase {
             .build();
   }
 
-  private String extractErrorMessage(Throwable e) {
+  String extractErrorMessage(Throwable e) {
     log.info(Constants.LOG_EXTRACTING_ERROR_MESSAGE + e.getClass().getSimpleName());
     if (e instanceof ConstraintViolationException) {
       return ((ConstraintViolationException) e).getConstraintViolations().stream()
@@ -164,7 +164,7 @@ public class CalculateDebtCapacityUseCase {
     return Constants.MSG_UNEXPECTED_ERROR;
   }
 
-  private Mono<CreditReponse> handleError(Throwable e) {
+  Mono<CreditReponse> handleError(Throwable e) {
     log.severe(Constants.LOG_ERROR_CREDIT_CREATION + e.getMessage());
     String errorMessage = extractErrorMessage(e);
     log.info(Constants.LOG_ERROR_MESSAGE_EXTRACTED + errorMessage);
@@ -178,4 +178,6 @@ public class CalculateDebtCapacityUseCase {
   private Mono<CreditReponse> buildErrorResponse(CreditParameters params) {
     return buildResponseMono(Constants.STATUS_ERROR, params, Constants.MSG_USER_NOT_FOUND);
   }
+
+
 }

@@ -222,4 +222,52 @@ class CreditRepositoryAdapterTest {
     verify(creditApplicationRepository).save(creditApplication);
     verify(creditApplicationMapper).toDto(savedCreditApplication);
   }
+
+  @Test
+  void shouldFindAllCreditsByUserId() {
+    // Arrange
+    String userId = "109876543";
+    CreditApplication userCreditApplication = CreditApplication.builder().id(2L).build();
+    CreditParameters userCreditParameters = CreditParameters.builder().documentNumber(109876543L).build();
+
+    when(creditApplicationRepository.findAllByUserId(Long.valueOf(userId)))
+            .thenReturn(Flux.just(userCreditApplication));
+    when(creditApplicationMapper.toDto(userCreditApplication)).thenReturn(userCreditParameters);
+
+    // Act
+    Flux<CreditParameters> result = creditRepositoryAdapter.findAllCredits(userId);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNext(userCreditParameters)
+            .verifyComplete();
+
+    verify(creditApplicationRepository).findAllByUserId(Long.valueOf(userId));
+    verify(creditApplicationMapper).toDto(userCreditApplication);
+  }
+
+  @Test
+  void shouldUpdateStateSuccessfully() {
+    // Arrange
+    Long id = 1L;
+    String estado = "APROBADO";
+    CreditApplication updatedCreditApplication = savedCreditApplication.toBuilder().estado(estado).build();
+    CreditParameters updatedCreditParameters = creditParameters.toBuilder().estado(estado).build();
+
+    when(creditApplicationRepository.findById(id)).thenReturn(Mono.just(savedCreditApplication));
+    when(creditApplicationRepository.save(savedCreditApplication)).thenReturn(Mono.just(updatedCreditApplication));
+    when(creditApplicationMapper.toDto(updatedCreditApplication)).thenReturn(updatedCreditParameters);
+
+    // Act
+    Mono<CreditParameters> result = creditRepositoryAdapter.updateState(id, estado);
+
+    // Assert
+    StepVerifier.create(result)
+            .expectNext(updatedCreditParameters)
+            .verifyComplete();
+
+    verify(creditApplicationRepository).findById(id);
+    verify(creditApplicationRepository).save(savedCreditApplication);
+    verify(creditApplicationMapper).toDto(updatedCreditApplication);
+  }
 }

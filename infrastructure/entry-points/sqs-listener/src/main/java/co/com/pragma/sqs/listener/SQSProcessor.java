@@ -32,8 +32,9 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
   }
 
 
-  private MessageCapacidadEndeudamiento convertirMensaje(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
+  MessageCapacidadEndeudamiento convertirMensaje(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
     return objectMapper.readValue(body, MessageCapacidadEndeudamiento.class);
   }
+
 }

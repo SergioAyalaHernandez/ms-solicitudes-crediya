@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -165,5 +166,62 @@ class JwtProviderImplTest {
 
     // Assert
     assertTrue(extractedRoles.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Debería extraer el correo electrónico de un token válido")
+  void getEmailFromToken_withValidToken_shouldReturnEmail() {
+    // Arrange
+    String email = "usuario@correo.com";
+    String encodedEmail = Base64.getEncoder().encodeToString(email.getBytes());
+    long now = System.currentTimeMillis();
+    String token = Jwts.builder()
+            .setSubject("user123")
+            .claim("correoElectronico", encodedEmail)
+            .setIssuedAt(new Date(now))
+            .setExpiration(new Date(now + 3600000))
+            .signWith(testSecretKey, SignatureAlgorithm.HS256)
+            .compact();
+
+    // Act
+    String extractedEmail = jwtProvider.getEmailFromToken(token);
+
+    // Assert
+    assertEquals(email, extractedEmail);
+  }
+
+  @Test
+  @DisplayName("Debería lanzar RuntimeException si el token de correo es inválido")
+  void getEmailFromToken_withInvalidToken_shouldThrowRuntimeException() {
+    String invalidToken = generateInvalidToken();
+    assertThrows(RuntimeException.class, () -> jwtProvider.getEmailFromToken(invalidToken));
+  }
+
+  @Test
+  @DisplayName("Debería extraer el salario base de un token válido")
+  void getSalarioFromToken_withValidToken_shouldReturnSalario() {
+    // Arrange
+    Double salario = 12345.67;
+    long now = System.currentTimeMillis();
+    String token = Jwts.builder()
+            .setSubject("user123")
+            .claim("salarioBase", salario)
+            .setIssuedAt(new Date(now))
+            .setExpiration(new Date(now + 3600000))
+            .signWith(testSecretKey, SignatureAlgorithm.HS256)
+            .compact();
+
+    // Act
+    Double extractedSalario = jwtProvider.getSalarioFromToken(token);
+
+    // Assert
+    assertEquals(salario, extractedSalario);
+  }
+
+  @Test
+  @DisplayName("Debería lanzar RuntimeException si el token de salario es inválido")
+  void getSalarioFromToken_withInvalidToken_shouldThrowRuntimeException() {
+    String invalidToken = generateInvalidToken();
+    assertThrows(RuntimeException.class, () -> jwtProvider.getSalarioFromToken(invalidToken));
   }
 }

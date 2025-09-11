@@ -5,6 +5,7 @@ import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.model.credit.CreditReponse;
 import co.com.pragma.model.gateway.CreditGateway;
 import co.com.pragma.model.gateway.JsonConverter;
+import co.com.pragma.model.gateway.JwtProvider;
 import co.com.pragma.model.gateway.NotificacionSQSGateway;
 import co.com.pragma.usecase.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,9 @@ class UpdateCreditUseCaseTest {
 
   @Mock
   private NotificacionSQSGateway notificacionSQSGateway;
+
+  @Mock
+  private JwtProvider jwtProvider;
 
   @Mock
   private JsonConverter jsonConverter;
@@ -64,7 +68,7 @@ class UpdateCreditUseCaseTest {
 
     verify(creditGateway).findById(id);
     verify(creditGateway).save(any());
-    verify(notificacionSQSGateway).emit("Optional[json-credit]");
+    verify(notificacionSQSGateway).emit("json-credit");
 
   }
 
@@ -93,7 +97,7 @@ class UpdateCreditUseCaseTest {
     // Arrange
     Long id = 3L;
     CreditApproved request = new CreditApproved(true);
-
+    when(jwtProvider.getEmailFromToken(anyString())).thenReturn("test@example.com");
     when(creditGateway.findById(id)).thenReturn(Mono.empty());
 
     // Act
@@ -141,7 +145,7 @@ class UpdateCreditUseCaseTest {
     updateCreditUseCase.updateCreditStatus(id, request,"Bearer token").block();
 
     // Assert
-    verify(notificacionSQSGateway).emit("Optional[json-credit]");
+    verify(notificacionSQSGateway).emit("json-credit");
   }
 
 }

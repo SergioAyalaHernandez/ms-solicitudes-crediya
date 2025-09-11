@@ -40,4 +40,5 @@ public class SQSSenderConfigCapacity {
     }
     return null;
   }
+
 }
