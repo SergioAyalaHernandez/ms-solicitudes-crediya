@@ -7,8 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CreditApplicationMapper {
-
-  @Mapping(target = "id", ignore = true)
+  @Mapping(source = "idEntidadGuardada", target = "id")
   CreditApplication toEntity(CreditParameters dto);
 
   @Mapping(source = "id", target = "idEntidadGuardada")

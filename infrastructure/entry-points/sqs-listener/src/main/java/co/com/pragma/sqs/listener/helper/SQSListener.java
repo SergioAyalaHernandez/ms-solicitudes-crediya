@@ -49,20 +49,20 @@ public class SQSListener {
                 .onErrorContinue((e, o) -> log.error("Error listening sqs message", e));
     }
 
-    private Mono<Void> confirm(Message message) {
+    Mono<Void> confirm(Message message) {
         return Mono.fromCallable(() -> getDeleteMessageRequest(message.receiptHandle()))
                 .flatMap(request -> Mono.fromFuture(client.deleteMessage(request)))
                 .then();
     }
 
-    private Flux<Message> getMessages() {
+    Flux<Message> getMessages() {
         return Mono.fromCallable(this::getReceiveMessageRequest)
                 .flatMap(request -> Mono.fromFuture(client.receiveMessage(request)))
                 .doOnNext(response -> log.debug("{} received messages from sqs", response.messages().size()))
                 .flatMapMany(response -> Flux.fromIterable(response.messages()));
     }
 
-    private ReceiveMessageRequest getReceiveMessageRequest() {
+    ReceiveMessageRequest getReceiveMessageRequest() {
         return ReceiveMessageRequest.builder()
                 .queueUrl(properties.queueUrl())
                 .maxNumberOfMessages(properties.maxNumberOfMessages())
@@ -71,7 +71,7 @@ public class SQSListener {
                 .build();
     }
 
-    private DeleteMessageRequest getDeleteMessageRequest(String receiptHandle) {
+    DeleteMessageRequest getDeleteMessageRequest(String receiptHandle) {
         return DeleteMessageRequest.builder()
                 .queueUrl(properties.queueUrl())
                 .receiptHandle(receiptHandle)

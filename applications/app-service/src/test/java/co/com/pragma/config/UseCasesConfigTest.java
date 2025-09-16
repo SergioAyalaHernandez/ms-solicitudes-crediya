@@ -65,6 +65,23 @@ public class UseCasesConfigTest {
         public co.com.pragma.model.gateway.JsonConverter jsonConverter() {
             return org.mockito.Mockito.mock(co.com.pragma.model.gateway.JsonConverter.class);
         }
+
+        @Bean
+        public co.com.pragma.model.gateway.NotificacionSQSCapacidadGateway notificacionSQSCapacidadGateway() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.NotificacionSQSCapacidadGateway.class);
+        }
+
+        @Bean
+        public co.com.pragma.model.gateway.NotificationEmailSQSGateway notificationEmailSQSGateway() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.NotificationEmailSQSGateway.class);
+        }
+
+        @Bean
+        public co.com.pragma.model.gateway.ReportSQSGateway reportSQSGateway() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.ReportSQSGateway.class);
+        }
+
+
     }
 
     static class MyUseCase {

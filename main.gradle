@@ -61,7 +61,12 @@ subprojects {
                 'co.com.pragma.api.config.SecurityHeadersConfig',
                 'co.com.pragma.api.openapi.OpenApiConfig',
                 'co.com.pragma.api.security.SecurityConfig',
-                'co.com.pragma.consumer.config.RestConsumerConfig'
+                'co.com.pragma.consumer.config.RestConsumerConfig',
+                'co.com.pragma.sqs.listener.helper.SQSListener',
+                'co.com.pragma.sqs.listener.config.SQSConfig',
+                'co.com.pragma.metrics.aws.MicrometerMetricPublisher',
+                'co.com.pragma.sqs.sender.config.report.SQSSenderReportConfig'
+
         ]
         excludedTestClasses = []
         pitestVersion = '1.20.1'

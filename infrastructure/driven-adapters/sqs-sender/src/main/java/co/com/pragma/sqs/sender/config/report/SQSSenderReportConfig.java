@@ -1,4 +1,4 @@
-package co.com.pragma.sqs.sender.config.capacity;
+package co.com.pragma.sqs.sender.config.report;
 
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -13,7 +13,7 @@ import java.net.URI;
 
 @Configuration
 @ConditionalOnMissingBean(SqsAsyncClient.class)
-public class SQSSenderConfigCapacity {
+public class SQSSenderReportConfig {
   @Bean
   public SqsAsyncClient configSqs(SQSSenderProperties properties, MetricPublisher publisher) {
     return SqsAsyncClient.builder()
@@ -40,5 +40,4 @@ public class SQSSenderConfigCapacity {
     }
     return null;
   }
-
 }

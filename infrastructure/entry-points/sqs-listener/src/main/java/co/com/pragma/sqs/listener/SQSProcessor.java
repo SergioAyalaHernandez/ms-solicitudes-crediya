@@ -22,8 +22,8 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
   public Mono<Void> apply(Message message) {
     try {
       String body = message.body();
-      log.info(Constants.LOG_BODY_MESSAGE + body);
-      myUseCase.actualizarEstadoSolicitudCredito(convertirMensaje(String.valueOf(message))).subscribe();
+      log.info(Constants.LOG_BODY_MESSAGE + "{}", body);
+      myUseCase.actualizarEstadoSolicitudCredito(convertirMensaje(body)).subscribe();
     } catch (Exception ex) {
       log.error(Constants.ERROR_PROCESSING_MESSAGE, ex);
       throw new RuntimeException(Constants.ERROR_PROCESSING_MESSAGE, ex);
@@ -32,8 +32,9 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
   }
 
 
-  private MessageCapacidadEndeudamiento convertirMensaje(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
+  MessageCapacidadEndeudamiento convertirMensaje(String body) throws com.fasterxml.jackson.core.JsonProcessingException {
     ObjectMapper objectMapper = new ObjectMapper();
     return objectMapper.readValue(body, MessageCapacidadEndeudamiento.class);
   }
+
 }

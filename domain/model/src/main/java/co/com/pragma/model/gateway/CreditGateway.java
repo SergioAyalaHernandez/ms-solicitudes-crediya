@@ -15,5 +15,5 @@ public interface CreditGateway {
   Mono<CreditReponse> findById(Long id);
   Mono<CreditParameters> save(CreditParameters creditParameters);
   Flux<CreditParameters> findAllCredits(String userId);
-  Mono<Void> updateState(Long id, String estado);
+  Mono<CreditParameters> updateState(Long id, String estado);
 }

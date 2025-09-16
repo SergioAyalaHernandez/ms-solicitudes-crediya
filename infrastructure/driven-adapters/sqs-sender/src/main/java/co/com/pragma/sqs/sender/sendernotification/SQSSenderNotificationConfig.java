@@ -1,6 +1,5 @@
-package co.com.pragma.sqs.sender.config.capacity;
+package co.com.pragma.sqs.sender.sendernotification;
 
-import co.com.pragma.sqs.sender.config.SQSSenderProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,9 +12,9 @@ import java.net.URI;
 
 @Configuration
 @ConditionalOnMissingBean(SqsAsyncClient.class)
-public class SQSSenderConfigCapacity {
+public class SQSSenderNotificationConfig {
   @Bean
-  public SqsAsyncClient configSqs(SQSSenderProperties properties, MetricPublisher publisher) {
+  public SqsAsyncClient configSqs(SQSSenderPropertiesNotification properties, MetricPublisher publisher) {
     return SqsAsyncClient.builder()
             .endpointOverride(resolveEndpoint(properties))
             .region(Region.of(properties.region()))
@@ -23,6 +22,7 @@ public class SQSSenderConfigCapacity {
             .credentialsProvider(getProviderChain())
             .build();
   }
+
   AwsCredentialsProviderChain getProviderChain() {
     return AwsCredentialsProviderChain.builder()
             .addCredentialsProvider(EnvironmentVariableCredentialsProvider.create())
@@ -34,11 +34,12 @@ public class SQSSenderConfigCapacity {
             .build();
   }
 
-  URI resolveEndpoint(SQSSenderProperties properties) {
+  URI resolveEndpoint(SQSSenderPropertiesNotification properties) {
     if (properties.endpoint() != null) {
       return URI.create(properties.endpoint());
     }
     return null;
   }
+
 
 }

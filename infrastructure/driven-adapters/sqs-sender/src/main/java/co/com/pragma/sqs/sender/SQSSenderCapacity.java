@@ -2,6 +2,7 @@ package co.com.pragma.sqs.sender;
 
 import co.com.pragma.model.gateway.NotificacionSQSCapacidadGateway;
 import co.com.pragma.sqs.sender.config.capacity.SQSSenderPropertiesCapacity;
+import co.com.pragma.sqs.sender.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -17,13 +18,12 @@ public class SQSSenderCapacity implements NotificacionSQSCapacidadGateway {
   private final SQSSenderPropertiesCapacity properties;
   private final SqsAsyncClient client;
 
-  @Override
   public Mono<Void> emit(String message) {
-    log.info("Intentando enviar mensaje a la cola SQS: {}", message);
+    log.info(Constants.LOG_SENDING_MESSAGE, message);
     return Mono.fromCallable(() -> buildRequest(message))
             .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-            .doOnNext(response -> log.info("Mensaje enviado correctamente. MessageId: {}", response.messageId()))
-            .doOnError(error -> log.error("Error al enviar mensaje a la cola SQS", error))
+            .doOnNext(response -> log.info(Constants.LOG_MESSAGE_SENT, response.messageId()))
+            .doOnError(error -> log.error(Constants.LOG_ERROR_SENDING_MESSAGE, error))
             .map(SendMessageResponse::messageId).then();
   }
 

@@ -1,7 +1,8 @@
 package co.com.pragma.sqs.sender;
 
-import co.com.pragma.model.gateway.NotificacionSQSGateway;
-import co.com.pragma.sqs.sender.config.SQSSenderProperties;
+import co.com.pragma.model.gateway.NotificationEmailSQSGateway;
+import co.com.pragma.sqs.sender.config.capacity.SQSSenderPropertiesCapacity;
+import co.com.pragma.sqs.sender.sendernotification.SQSSenderPropertiesNotification;
 import co.com.pragma.sqs.sender.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,10 +15,12 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-public class SQSSender implements NotificacionSQSGateway {
-  private final SQSSenderProperties properties;
+public class SQSSenderNotification implements NotificationEmailSQSGateway {
+
+  private final SQSSenderPropertiesNotification properties;
   private final SqsAsyncClient client;
 
+  @Override
   public Mono<Void> emit(String message) {
     log.info(Constants.LOG_SENDING_MESSAGE, message);
     return Mono.fromCallable(() -> buildRequest(message))
