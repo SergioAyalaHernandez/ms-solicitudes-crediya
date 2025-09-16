@@ -1,9 +1,6 @@
 package co.com.pragma.usecase;
 
-import co.com.pragma.model.credit.AutomaticCredit;
-import co.com.pragma.model.credit.CreditParameters;
-import co.com.pragma.model.credit.CreditReponse;
-import co.com.pragma.model.credit.PrestamoActivo;
+import co.com.pragma.model.credit.*;
 import co.com.pragma.model.gateway.*;
 import co.com.pragma.usecase.exceptions.ConstraintViolation;
 import co.com.pragma.usecase.exceptions.ConstraintViolationException;
@@ -178,6 +175,5 @@ public class CalculateDebtCapacityUseCase {
   private Mono<CreditReponse> buildErrorResponse(CreditParameters params) {
     return buildResponseMono(Constants.STATUS_ERROR, params, Constants.MSG_USER_NOT_FOUND);
   }
-
 
 }

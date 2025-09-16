@@ -2,6 +2,7 @@ package co.com.pragma.usecase;
 
 import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditReponse;
+import co.com.pragma.model.credit.MontoAprobado;
 import co.com.pragma.model.gateway.*;
 import co.com.pragma.usecase.exceptions.NotFoundException;
 import co.com.pragma.usecase.utils.Constants;
@@ -17,6 +18,7 @@ public class UpdateCreditUseCase {
 
   private final CreditGateway creditGateway;
   private final NotificacionSQSGateway notificacionSQSGateway;
+  private final ReportSQSGateway reportSQSGateway;
   private final JsonConverter jsonConverter;
   private final JwtProvider jwtProvider;
 
@@ -25,6 +27,7 @@ public class UpdateCreditUseCase {
     String email = jwtProvider.getEmailFromToken(token);
     return creditGateway.findById(id)
             .flatMap(credit -> updateCredit(credit, newStatus))
+            .doOnNext(credit -> processApprovedCredit(credit, newStatus))
             .doOnNext(creditReponse -> creditReponse.getCreditParameters().setEmailNotification(email))
             .doOnNext(this::emitNotification)
             .switchIfEmpty(Mono.error(new NotFoundException(String.format(Constants.CREDIT_NOT_FOUND_MESSAGE, id))))
@@ -56,5 +59,15 @@ public class UpdateCreditUseCase {
             .statusResponse(Constants.STATUS_ERROR)
             .errorMessage(e.getMessage())
             .build());
+  }
+
+  private Mono<CreditReponse> processApprovedCredit(CreditReponse credit, String newStatus) {
+    if (newStatus.equals(Constants.STATUS_APPROVED)) {
+      MontoAprobado montoAprobado = MontoAprobado.builder()
+              .montoAprobado(String.valueOf(credit.getCreditParameters().getMonto()))
+              .build();
+      jsonConverter.toJson(montoAprobado).ifPresent(json -> reportSQSGateway.emit(json).subscribe());
+    }
+    return Mono.just(credit);
   }
 }

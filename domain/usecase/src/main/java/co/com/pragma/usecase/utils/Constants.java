@@ -9,7 +9,7 @@ public class Constants {
 
   public static final String MSG_USER_NOT_FOUND = "El usuario no existe";
   public static final String MSG_UNEXPECTED_ERROR = "Error inesperado";
-  public static final String ESTADO_PENDIENTE_REVISION = "Pendiente de revisión";
+  public static final String ESTADO_PENDIENTE_REVISION = "PENDIENTE DE REVISION";
 
   // Mensajes de log
   public static final String LOG_INIT_CREDIT_CREATION = "Iniciando proceso de creación de crédito";
@@ -36,8 +36,9 @@ public class Constants {
 
   public static final String SIZE = " Size: ";
 
-  public static final String STATUS_APPROVED = "Aprobada";
-  public static final String STATUS_REJECTED = "Rechazada";
+  public static final String STATUS_APPROVED = "APROBADO";
+  public static final String STATUS_APPROVED_LAMDA ="APROBADO";
+  public static final String STATUS_REJECTED = "RECHAZADO";
   public static final String CREDIT_NOT_FOUND_MESSAGE = "Crédito con id %d no encontrado";
 
   public static final String JSON_ERROR_MESSAGE = "Error al convertir a JSON: ";

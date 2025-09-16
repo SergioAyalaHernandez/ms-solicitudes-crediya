@@ -76,6 +76,11 @@ public class UseCasesConfigTest {
             return org.mockito.Mockito.mock(co.com.pragma.model.gateway.NotificationEmailSQSGateway.class);
         }
 
+        @Bean
+        public co.com.pragma.model.gateway.ReportSQSGateway reportSQSGateway() {
+            return org.mockito.Mockito.mock(co.com.pragma.model.gateway.ReportSQSGateway.class);
+        }
+
 
     }
 

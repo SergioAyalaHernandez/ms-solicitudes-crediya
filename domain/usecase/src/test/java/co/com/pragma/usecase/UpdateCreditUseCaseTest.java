@@ -3,149 +3,142 @@ package co.com.pragma.usecase;
 import co.com.pragma.model.credit.CreditApproved;
 import co.com.pragma.model.credit.CreditParameters;
 import co.com.pragma.model.credit.CreditReponse;
-import co.com.pragma.model.gateway.CreditGateway;
-import co.com.pragma.model.gateway.JsonConverter;
-import co.com.pragma.model.gateway.JwtProvider;
-import co.com.pragma.model.gateway.NotificacionSQSGateway;
+import co.com.pragma.model.gateway.*;
 import co.com.pragma.usecase.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
 class UpdateCreditUseCaseTest {
 
-  @Mock
   private CreditGateway creditGateway;
-
-  @Mock
   private NotificacionSQSGateway notificacionSQSGateway;
-
-  @Mock
-  private JwtProvider jwtProvider;
-
-  @Mock
+  private ReportSQSGateway reportSQSGateway;
   private JsonConverter jsonConverter;
-
-  @InjectMocks
-  private UpdateCreditUseCase updateCreditUseCase;
-
-  private CreditReponse creditResponse;
+  private JwtProvider jwtProvider;
+  private UpdateCreditUseCase useCase;
 
   @BeforeEach
   void setUp() {
-    MockitoAnnotations.openMocks(this);
-    creditResponse = CreditReponse.builder()
-            .creditParameters(new CreditParameters())
-            .statusResponse(Constants.STATUS_OK)
-            .build();
+    creditGateway = mock(CreditGateway.class);
+    notificacionSQSGateway = mock(NotificacionSQSGateway.class);
+    reportSQSGateway = mock(ReportSQSGateway.class);
+    jsonConverter = mock(JsonConverter.class);
+    jwtProvider = mock(JwtProvider.class);
+
+    useCase = new UpdateCreditUseCase(
+            creditGateway, notificacionSQSGateway, reportSQSGateway, jsonConverter, jwtProvider);
   }
 
   @Test
-  void shouldUpdateCreditStatusToApproved() {
+  void updateCreditStatus_creditFoundAndApproved() {
     // Arrange
     Long id = 1L;
+    String token = "jwt.token";
     CreditApproved request = new CreditApproved(true);
-    creditResponse.getCreditParameters().setEstado("EN_REVISION");
 
-    when(creditGateway.findById(id)).thenReturn(Mono.just(creditResponse));
-    when(creditGateway.save(any())).thenReturn(Mono.just(creditResponse.getCreditParameters()));
-    when(jsonConverter.toJson(any())).thenReturn(Optional.of("json-credit"));
-    when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
+    CreditParameters params = CreditParameters.builder()
+            .monto(BigDecimal.valueOf(10000.0))
+            .estado("PENDING")
+            .build();
 
-    // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
+    CreditReponse existing = CreditReponse.builder()
+            .creditParameters(params)
+            .build();
 
-    // Assert
-    StepVerifier.create(result)
-            .expectNextMatches(r -> r.getCreditParameters().getEstado().equals(Constants.STATUS_APPROVED))
+    when(jwtProvider.getEmailFromToken(token)).thenReturn("user@mail.com");
+    when(creditGateway.findById(id)).thenReturn(Mono.just(existing));
+    when(creditGateway.save(any(CreditParameters.class)))
+            .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+    when(jsonConverter.toJson(any())).thenReturn(Optional.of("{json}"));
+    when(reportSQSGateway.emit("{json}")).thenReturn(Mono.empty());
+    when(notificacionSQSGateway.emit("{json}")).thenReturn(Mono.empty());
+
+    // Act & Assert
+    StepVerifier.create(useCase.updateCreditStatus(id, request, token))
+            .assertNext(response -> {
+              assert response.getStatusResponse().equals(Constants.STATUS_OK);
+              assert response.getCreditParameters().getEstado().equals(Constants.STATUS_APPROVED);
+              assert response.getCreditParameters().getEmailNotification().equals("user@mail.com");
+            })
             .verifyComplete();
 
-    verify(creditGateway).findById(id);
-    verify(creditGateway).save(any());
-    verify(notificacionSQSGateway).emit("json-credit");
-
+    verify(reportSQSGateway, times(1)).emit("{json}");
+    verify(notificacionSQSGateway, times(1)).emit("{json}");
+    verify(creditGateway, times(1)).save(any(CreditParameters.class));
   }
 
   @Test
-  void shouldUpdateCreditStatusToRejected() {
-    // Arrange
+  void updateCreditStatus_creditFoundAndRejected() {
     Long id = 2L;
+    String token = "jwt.token";
     CreditApproved request = new CreditApproved(false);
 
-    when(creditGateway.findById(id)).thenReturn(Mono.just(creditResponse));
-    when(creditGateway.save(any())).thenReturn(Mono.just(creditResponse.getCreditParameters()));
-    when(jsonConverter.toJson(any())).thenReturn(Optional.of("json-credit"));
-    when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
+    CreditParameters params = CreditParameters.builder()
+            .monto(BigDecimal.valueOf(5000.0))
+            .estado("PENDING")
+            .build();
 
-    // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
+    CreditReponse existing = CreditReponse.builder()
+            .creditParameters(params)
+            .build();
 
-    // Assert
-    StepVerifier.create(result)
-            .expectNextMatches(r -> r.getCreditParameters().getEstado().equals(Constants.STATUS_REJECTED))
+    when(jwtProvider.getEmailFromToken(token)).thenReturn("user@mail.com");
+    when(creditGateway.findById(id)).thenReturn(Mono.just(existing));
+    when(creditGateway.save(any(CreditParameters.class)))
+            .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+    when(jsonConverter.toJson(any())).thenReturn(Optional.of("{json}"));
+    when(notificacionSQSGateway.emit("{json}")).thenReturn(Mono.empty());
+
+    StepVerifier.create(useCase.updateCreditStatus(id, request, token))
+            .assertNext(response -> {
+              assert response.getCreditParameters().getEstado().equals(Constants.STATUS_REJECTED);
+            })
             .verifyComplete();
+
+    verify(reportSQSGateway, never()).emit(any());
+    verify(notificacionSQSGateway, times(1)).emit("{json}");
   }
 
   @Test
-  void shouldReturnNotFoundWhenCreditDoesNotExist() {
-    // Arrange
+  void updateCreditStatus_creditNotFound() {
     Long id = 3L;
+    String token = "jwt.token";
     CreditApproved request = new CreditApproved(true);
-    when(jwtProvider.getEmailFromToken(anyString())).thenReturn("test@example.com");
+
+    when(jwtProvider.getEmailFromToken(token)).thenReturn("user@mail.com");
     when(creditGateway.findById(id)).thenReturn(Mono.empty());
 
-    // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
-
-    // Assert
-    StepVerifier.create(result)
-            .expectNextMatches(r -> r.getStatusResponse().equals(Constants.STATUS_ERROR)
-                    && r.getErrorMessage().equals(String.format(Constants.CREDIT_NOT_FOUND_MESSAGE, id)))
+    StepVerifier.create(useCase.updateCreditStatus(id, request, token))
+            .assertNext(response -> {
+              assert response.getStatusResponse().equals(Constants.STATUS_ERROR);
+              assert response.getErrorMessage().contains("no encontrado");
+            })
             .verifyComplete();
   }
 
 
   @Test
-  void shouldHandleErrorWhenSavingFails() {
-    // Arrange
+  void updateCreditStatus_gatewayThrowsError() {
     Long id = 4L;
+    String token = "jwt.token";
     CreditApproved request = new CreditApproved(true);
 
-    when(creditGateway.findById(id)).thenReturn(Mono.just(creditResponse));
-    when(creditGateway.save(any())).thenReturn(Mono.error(new RuntimeException("DB error")));
+    when(jwtProvider.getEmailFromToken(token)).thenReturn("user@mail.com");
+    when(creditGateway.findById(id)).thenReturn(Mono.error(new RuntimeException("DB error")));
 
-    // Act
-    Mono<CreditReponse> result = updateCreditUseCase.updateCreditStatus(id, request,"Bearer token");
-
-    // Assert
-    StepVerifier.create(result)
-            .expectNextMatches(r -> r.getStatusResponse().equals(Constants.STATUS_ERROR)
-                    && r.getErrorMessage().equals("DB error"))
+    StepVerifier.create(useCase.updateCreditStatus(id, request, token))
+            .assertNext(response -> {
+              assert response.getStatusResponse().equals(Constants.STATUS_ERROR);
+              assert response.getErrorMessage().contains("DB error");
+            })
             .verifyComplete();
-  }
-
-  @Test
-  void shouldEmitNotificationWithJson() {
-    // Arrange
-    Long id = 5L;
-    CreditApproved request = new CreditApproved(true);
-
-    when(creditGateway.findById(id)).thenReturn(Mono.just(creditResponse));
-    when(creditGateway.save(any())).thenReturn(Mono.just(creditResponse.getCreditParameters()));
-    when(jsonConverter.toJson(any())).thenReturn(Optional.of("json-credit"));
-    when(notificacionSQSGateway.emit(anyString())).thenReturn(Mono.empty());
-
-    // Act
-    updateCreditUseCase.updateCreditStatus(id, request,"Bearer token").block();
-
-    // Assert
-    verify(notificacionSQSGateway).emit("json-credit");
   }
 
 }
