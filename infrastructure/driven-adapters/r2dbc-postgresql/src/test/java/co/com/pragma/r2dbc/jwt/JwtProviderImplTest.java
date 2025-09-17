@@ -22,7 +22,8 @@ class JwtProviderImplTest {
 
   @BeforeEach
   void setUp() {
-    jwtProvider = new JwtProviderImpl();
+    String testSecret = "ClaveSuperSecretaDePruebaQueDebeTenerAlMenos256Bits!";
+    jwtProvider = new JwtProviderImpl(testSecret);
   }
 
   private String generateValidToken(String userId, String roles) {

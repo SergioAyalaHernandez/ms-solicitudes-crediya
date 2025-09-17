@@ -1,13 +1,16 @@
 package co.com.pragma.r2dbc.jwt;
 
 import co.com.pragma.model.gateway.JwtProvider;
+import co.com.pragma.r2dbc.utils.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Base64;
@@ -18,7 +21,12 @@ import java.util.stream.Collectors;
 @Log
 public class JwtProviderImpl implements JwtProvider {
 
-  private final Key secretKey = Keys.hmacShaKeyFor("ClaveSuperSecretaDeJWTQueDebeTenerAlMenos256Bits!".getBytes());
+  private final Key secretKey;
+
+  public JwtProviderImpl(@Value("${jwt.secret}") String jwtSecret) {
+    this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    log.info(Constants.JWT_SECRET_LOADED);
+  }
 
   @Override
   public boolean validateToken(String token) {
@@ -48,16 +56,16 @@ public class JwtProviderImpl implements JwtProvider {
       String objectId = claims.get("objectId", String.class);
       return objectId != null ? objectId : claims.getSubject();
     } catch (JwtException | IllegalArgumentException e) {
-      log.warning("Error al procesar el token JWT: " + e.getMessage());
-      throw new RuntimeException("Token inválido: " + e.getMessage(), e);
+      log.warning(Constants.ERROR_PROCESSING_TOKEN + e.getMessage());
+      throw new RuntimeException(Constants.INVALID_TOKEN + e.getMessage(), e);
     }
   }
 
   @Override
   public String getEmailFromToken(String token) {
-    log.info("Token recibido: " + token);
+    log.info(Constants.TOKEN_RECEIVED + token);
     try {
-      if (token != null && token.startsWith("Bearer ")) {
+      if (token != null && token.startsWith(Constants.BEARER)) {
         token = token.substring(7);
       }
       token = token != null ? token.trim() : "";
@@ -67,18 +75,18 @@ public class JwtProviderImpl implements JwtProvider {
               .build()
               .parseClaimsJws(token)
               .getBody();
-      String encodedEmail = claims.get("correoElectronico", String.class);
+      String encodedEmail = claims.get(Constants.EMAIL, String.class);
       return new String(Base64.getDecoder().decode(encodedEmail));
     } catch (JwtException | IllegalArgumentException e) {
-      log.warning("Error al obtener el correo electrónico del token: " + e.getMessage());
-      throw new RuntimeException("Token inválido: " + e.getMessage(), e);
+      log.warning(Constants.ERROR_GETTING_EMAIL + e.getMessage());
+      throw new RuntimeException(Constants.INVALID_TOKEN + e.getMessage(), e);
     }
   }
 
   @Override
   public Double getSalarioFromToken(String token) {
     try {
-      if (token != null && token.startsWith("Bearer ")) {
+      if (token != null && token.startsWith(Constants.BEARER)) {
         token = token.substring(7);
       }
       token = token != null ? token.trim() : "";
@@ -89,8 +97,8 @@ public class JwtProviderImpl implements JwtProvider {
               .getBody();
       return claims.get("salarioBase", Double.class);
     } catch (JwtException | IllegalArgumentException e) {
-      log.warning("Error al obtener el salario del token: " + e.getMessage());
-      throw new RuntimeException("Token inválido: " + e.getMessage(), e);
+      log.warning(Constants.ERROR_GETTING_SALARY + e.getMessage());
+      throw new RuntimeException(Constants.INVALID_TOKEN + e.getMessage(), e);
     }
   }
 
@@ -104,10 +112,10 @@ public class JwtProviderImpl implements JwtProvider {
               .getBody();
 
       String rolesStr = claims.get("roles", String.class);
-      log.info("Roles extraídos del token: " + (rolesStr != null ? rolesStr : "null"));
+      log.info(Constants.ROLES_EXTRACTED + (rolesStr != null ? rolesStr : "null"));
 
       if (rolesStr == null || rolesStr.isEmpty()) {
-        log.info("No se encontraron roles en el token");
+          log.info(Constants.NO_ROLES_FOUND);
         return List.of();
       }
 
@@ -115,10 +123,10 @@ public class JwtProviderImpl implements JwtProvider {
               .map(String::trim)
               .collect(Collectors.toList());
 
-      log.info("Roles procesados: " + roles);
+      log.info(Constants.ROLES_PROCESSED + roles);
       return roles;
     } catch (Exception e) {
-      log.info("Error al obtener roles del token: " + e.getMessage());
+      log.info(Constants.ERROR_GETTING_ROLES + e.getMessage());
       return List.of();
     }
   }
