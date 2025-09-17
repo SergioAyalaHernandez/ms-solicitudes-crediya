@@ -1,14 +1,13 @@
 server:
   port: 8081
 spring:
+  config:
+    import:
+      - optional:aws-secretsmanager:crediya-secrets
   application:
     name: "ms-solicitudes"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
   profiles:
     include: null
 management:
@@ -24,15 +23,17 @@ management:
     circuitbreakers:
       enabled: true
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "${allowedOrigins}"
 adapters:
   r2dbc:
-    host: "localhost"
-    port: 5432
-    database: "postgres"
-    schema: "crediya"
-    username: "postgres"
-    password: "920808Ser."
+    host: "${r2dbcHost}"
+    port: "${r2dbcPort}"
+    database: "${r2dbcDataBase}"
+    schema: "${r2dbcSchema}"
+    username: "${r2dbcUsername}"
+    password: "${r2dbcPassword}"
+    options:
+      sslMode: require
     pool:
       enabled: true
       initial-size: 20
@@ -45,20 +46,20 @@ adapter:
     url: "http://localhost:8080"
   sqs:
     region: "us-east-1"
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/crediyanotificaciones"
-    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/crediyanotificaciones"
+    queueUrl: "${sqsqueueUrl}"
+    endpoint: "${sqsEndpoint}"
   sqscapacity:
     region: "us-east-1"
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
-    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/capacidadendeudamiento"
+    queueUrl: "${sqscapacityUrl}"
+    endpoint: "${sqscapacityEndpoint}"
   sqsnotificacionesporcorreo:
     region: "us-east-1"
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/notificacionesporcorreo"
-    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/notificacionesporcorreo"
+    queueUrl: "${sqsnotificacionesporcorreoUrl}"
+    endpoint: "${sqsnotificacionesporcorreoEndpoint}"
   sqsreport:
     region: "us-east-1"
-    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/reportes"
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/reportes"
+    endpoint: "${sqsreportUrl}"
+    queueUrl: "${sqsreportEndpoint}"
 resilience4j:
   circuitbreaker:
     instances:
@@ -83,9 +84,15 @@ resilience4j:
 entrypoint:
   sqs:
     region: "us-east-1"
-    endpoint: "https://sqs.us-east-1.amazonaws.com/057914081242/decisioncapacidadendeudamiento"
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/057914081242/decisioncapacidadendeudamiento"
+    endpoint: "${sqsSenderUrl}"
+    queueUrl: "${sqsSenderEndpoint}"
     waitTimeSeconds: 20
     maxNumberOfMessages: 10
     visibilityTimeoutSeconds: 10
     numberOfThreads: 1
+aws:
+  region: "us-east-1"
+
+jwt:
+  secret: "${jwtSecret}"
+  expiration: 3600
